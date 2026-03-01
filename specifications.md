@@ -48,4 +48,13 @@ Here is exactly how to weave the Responsible AI requirements into your 2-minute 
 * **Sunday:** Refine the fallback logic (the "Negative Space" bag drop and the Wi-Fi disconnect). Spend the last 4 hours recording and editing the video.
 
 ---
+
+## 4. Development & Implementation Notebooks
+
+The model implementation is divided strictly into singular-purpose notebooks according to their filenames, ensuring modularity and clean execution:
+
+* **`smoke_test.ipynb` (Validation & Integrity):** Focuses exclusively on data sanitization and model compilation viability. It verifies that real CSI HDF5 data can be parsed without NaN/Inf faults and that basic Dense and 1D-CNN layers compile on the host hardware.
+* **`training.ipynb` (Model Pipeline & Edge Export):** The core machine learning pipeline. It handles the standardization of disparate CSI inputs (e.g., matching 232-subcarrier to 64-subcarrier shapes), trains the lightweight 1D-CNN model with early stopping/validation, and directly exports the quantized `aegis_wave_final.tflite` optimized for constrained edge devices.
+
+---
 *This project hits every single note the DLW track is looking for: edge computing, extreme privacy, empathy for a vulnerable community, and deep technical execution.*

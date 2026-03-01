@@ -13,11 +13,13 @@ Aegis Wave uses Wi-Fi CSI (Channel State Information) to detect falls without ca
 - 🛡️ **Graceful Degradation**: Confidence-based alerts prevent false alarms
 - 📊 **Explainable AI**: Visual CSI waveforms for dispatcher trust
 
-## Documentation
+## Documentation & Notebooks
 
-- **[spec-document.md](spec-document.md)** - Complete technical specification and hackathon implementation guide
-- **[aegis_wave_poc.ipynb](aegis_wave_poc.ipynb)** - Basic proof-of-concept with simulated data
-- **[aegis_wave_feasibility.ipynb](aegis_wave_feasibility.ipynb)** - Feasibility analysis based on FallDeFi paper with real dataset integration
+This project is separated into singular-purpose Jupyter Notebooks to cleanly reflect each stage of the development and testing process:
+
+- **[specifications.md](specifications.md)** - Complete technical specification and hackathon implementation guide.
+- **[smoke_test.ipynb](smoke_test.ipynb)** - An ultra-robust diagnostic and data integrity test. Its singular purpose is to ensure the real HDF5 dataset can be successfully parsed, sanitized of NaN/Inf values, and that both Dense and 1D-CNN model architectures compile and execute correctly on the hardware without memory or compilation errors.
+- **[training.ipynb](training.ipynb)** - The primary training and validation pipeline. Its singular purpose is to handle robust data processing (standardizing 232-subcarrier and 64-subcarrier inputs), train the 1D-CNN fall detection model, evaluate its performance, and export the optimized, quantized TensorFlow Lite model (`aegis_wave_final.tflite`) for deployment on heterogeneous edge devices.
 
 ## Setup Instructions
 
@@ -45,34 +47,19 @@ pip install -r requirements.txt
 jupyter notebook
 ```
 
-Then open either:
-- `aegis_wave_poc.ipynb` for basic demonstration
-- `aegis_wave_feasibility.ipynb` for full feasibility analysis
-
-## Quick Start
-
-1. Follow setup instructions above
-2. Open `aegis_wave_feasibility.ipynb`
-3. Run all cells to see:
-   - CSI data simulation
-   - Model training (SVM + CNN)
-   - TensorFlow Lite conversion
-   - Real-time inference simulation
-   - Confidence-based alert system
+Then open the notebook corresponding to your current task (e.g., `smoke_test.ipynb` to verify data loading and compilation, or `training.ipynb` for full model training and export).
 
 ## Dataset
 
-The project uses the FallDeFi dataset structure:
-- 30 subcarriers from Intel 5300 NIC
+The project relies on Wi-Fi CSI subcarrier data. The actual dataset structure features:
 - Activities: fall, walk, sit, liedown, bend, run
-- ~100 packets per activity instance
 
-For hackathon: Simulated data is included. Real dataset available at [FallDeFi GitHub](https://github.com/dmsp123/FallDeFi).
+Real data sets are processed in `smoke_test.ipynb` for data sanitization checks and `training.ipynb` for final model generation.
 
 ## Technology Stack
 
 - **ML Framework**: TensorFlow/Keras + scikit-learn
-- **Edge Deployment**: TensorFlow Lite (<50KB models)
+- **Edge Deployment**: TensorFlow Lite (<100KB models)
 - **Signal Processing**: SciPy (Butterworth filtering)
 - **Visualization**: Matplotlib
 
