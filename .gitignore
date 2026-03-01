@@ -15,6 +15,9 @@ build/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
+# Anaconda
+anaconda_projects/
+
 # TensorFlow/Models
 *.tflite
 *.h5
