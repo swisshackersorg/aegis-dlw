@@ -23,6 +23,7 @@ saved_model/
 
 # Data
 falldefi_dataset/
+data/
 *.csv
 *.dat
 
