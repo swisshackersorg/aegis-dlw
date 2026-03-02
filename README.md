@@ -1,10 +1,10 @@
-# Aegis Wave - Zero-Vision Fall Detection
+# Aegis - Zero-Vision Fall Detection
 
 **Tagline:** Zero-vision, zero-contact fall detection for the elderly using ambient Wi-Fi.
 
 ## Project Overview
 
-Aegis Wave uses Wi-Fi CSI (Channel State Information) to detect falls without cameras, preserving privacy while providing reliable emergency detection for elderly residents in HDB flats.
+Aegis uses Wi-Fi CSI (Channel State Information) to detect falls without cameras, preserving privacy while providing reliable emergency detection for elderly residents in HDB flats.
 
 ### Key Features
 - 🔒 **Zero-Trust Privacy**: No cameras, no visual data
