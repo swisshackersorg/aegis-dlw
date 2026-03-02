@@ -42,5 +42,4 @@ wrapt==1.14.2
 pyarrow>=17.0.0
 numexpr>=2.10.1
 bottleneck>=1.4.0
-paho-mqtt==1.6.1
 twilio==8.2.2

@@ -10,8 +10,8 @@ For a 50-hour hackathon, do not try to configure physical Wi-Fi NICs to extract 
 
 * **The Data Source:** Utilise open-source datasets such as `csi_FallDetection`, `FallDeFi`, or other public datasets on Kaggle. These contain thousands of pre-processed Wi-Fi CSI matrices labeled with actions like "Fall," "Sit Down," "Walk," and "Pick Up."
 * **The AI Model:** Train a lightweight 1D-CNN (Convolutional Neural Network) or GRU (Gated Recurrent Unit) on the dataset. Convert it to **TensorFlow Lite** to prove it can run on an edge device with low compute.
-* **The (Simulated) Edge Node:** A Python script that reads the CSI dataset frame-by-frame (simulating a live Wi-Fi router feed), runs the local TFLite model, and publishes alerts via **MQTT**.
-* **The Dispatch UI:** A lightweight web dashboard for the HDB block warden or emergency dispatcher.
+* **The (Simulated) Edge Node:** A Python script (`edge_simulation.py`) that reads the CSI dataset frame-by-frame (simulating a live Wi-Fi router feed), runs the local TFLite model, and triggers immediate alerts via **SMS**.
+* **Explainability:** The system generates "Waveform Anomaly Charts" for every detection, allowing dispatchers to visually verify the anomaly.
 
 ---
 
@@ -27,29 +27,27 @@ Here is exactly how to weave the Responsible AI requirements into your 2-minute 
 ### B. The "Negative Space" Demo (Failing Safely)
 * **The Innovation:** Avoiding alarm fatigue. If the AI is unsure, it escalates gracefully instead of triggering a full emergency response.
 * **In the Video:** Show a simulation of someone dropping a heavy bag of rice. The AI model processes the CSI wave disturbance.
-* **The UI Action:** The dashboard shows: `ANOMALY DETECTED. Action: Fall-like Event. Confidence: 62% (Below 85% Emergency Threshold).` Instead of calling an ambulance, the system executes a safe fallback: it triggers an automated voice call to the resident's smart speaker: *"Auntie, did you drop something? Please say yes."*
+* **The terminal Action:** The simulation shows: `ANOMALY DETECTED. Action: Fall-like Event. Confidence: 62% (Below 85% Emergency Threshold).` Instead of calling an ambulance, the system executes a safe fallback: it triggers an automated voice call to the resident's smart speaker: *"Auntie, did you drop something? Please say yes."*
 
 ### C. The "UI of Trust" (Explainability)
 * **The Innovation:** Dispatchers need to know *why* the AI triggered an alert to trust it.
-* **In the Video:** Zoom in on your Dispatch Dashboard. When a true fall is detected (Confidence 98%), the UI doesn't just flash a red alarm. It displays a "Waveform Anomaly Chart."
+* **In the Video:** Zoom in on your simulation output and generated graphs. When a true fall is detected (Confidence 98%), the system doesn't just print an alert. It saves a "Waveform Anomaly Chart."
 * **The UI Action:** Show a simple graph comparing the "Normal Empty Room Baseline CSI" vs the "Current Disturbed CSI."
-* **Voiceover:** > *"Our UI doesn't just demand blind trust. It visually proves the anomaly to the dispatcher, showing the exact moment the Wi-Fi signal was fractured by a rapid human descent, allowing for immediate, confident dispatch."*
+* **Voiceover:** > *"Our system doesn't just demand blind trust. It visually proves the anomaly, showing the exact moment the Wi-Fi signal was fractured by a rapid human descent, allowing for immediate, confident verification."*
 
 ### D. Tangible Resilience (Graceful Degradation)
-* **The Innovation:** Wi-Fi goes down. Power trips. A public safety system cannot rely on perfect cloud connectivity.
-* **In the Video:** Do a live "pull the plug" demo. Show the edge node losing connection to the MQTT broker (simulate this by disabling your laptop's Wi-Fi).
-* **The UI Action:** Trigger a fall in the simulation while offline. Show the terminal output caching the alert locally (`connection_lost: caching payload`). Then, show a Twilio API integration immediately firing an SMS text to a caregiver's phone.
-* **Voiceover:** *"When the internet drops, Aegis doesn't die. It degrades gracefully, shifting from real-time dashboard updates to an offline cellular SMS fallback. The alert always gets through."*
-
-### E. High Performance and Low Latency Processing?
+* **The Innovation:** A public safety system must be resilient to network fluctuations.
+* **In the Video:** Show the edge node's ability to trigger immediate SMS alerts directly from the edge.
+* **The UI Action:** Trigger a fall in the simulation. Show the terminal output firing a Twilio API integration, immediately sending an SMS text to a caregiver's phone.
+* **Voiceover:** *"Aegis is built for resilience. Alerts don't just sit in a dashboard; they are fired as immediate SMS notifications to caregivers, ensuring the alert always gets through even if primary internet services are fluctuating."*
 
 ---
 
-## 3. Execution Timeline for your Team
+## 3. Future Extensions
 
-* **Day 1:** Download datasets. Have your ML person start training the basic TensorFlow model immediately. Have the backend person set up the MQTT broker and Twilio SMS integration.
-* **Day 2:** Write the Python script that feeds the dataset rows into your model sequentially to simulate a live feed. Build the frontend dashboard to subscribe to the MQTT alerts and display the "UI of Trust" graphs.
-* **Day 3:** Refine the fallback logic (the "Negative Space" bag drop and the Wi-Fi disconnect). Spend the last 4 hours recording and editing the video.
+* **MQTT Integration:** Implementing a pub/sub architecture using MQTT for real-time dashboard updates and centralized management of multiple edge nodes.
+* **The Dispatch UI:** A lightweight web dashboard for the HDB block warden or emergency dispatcher to subscribe to MQTT alerts and view real-time CSI streams.
+* **Physical Hardware:** Moving beyond simulation to extract real-time CSI data from physical Wi-Fi NICs.
 
 ---
 

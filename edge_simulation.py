@@ -9,7 +9,6 @@ import pandas as pd
 import h5py
 from scipy import signal
 import tensorflow as tf
-import paho.mqtt.client as mqtt
 from twilio.rest import Client
 import matplotlib.pyplot as plt
 
@@ -24,11 +23,6 @@ EMERGENCY_THRESHOLD = 0.85
 ANOMALY_THRESHOLD = 0.60
 VISUALISATION_DIR = "visualisations/"
 REPORT_DIR = "reports/"
-
-# MQTT Settings (Local simulated broker)
-MQTT_BROKER = "localhost"
-MQTT_PORT = 1883
-MQTT_TOPIC = "aegis/alerts"
 
 # Twilio Settings (Mock values, replace with real credentials)
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "mock_sid")
@@ -100,8 +94,8 @@ def visualize_waveform(sample_data, sample_id, actual_label, fall_confidence, ba
 # ==========================================
 # FALLBACK & ALERTING
 # ==========================================
-def send_sms_fallback(message):
-    print(f"[OFFLINE FALLBACK] Triggering Twilio SMS...")
+def send_sms_alert(message):
+    print(f"[ALERT] Triggering Twilio SMS...")
     print(f"   => Message: {message}")
     if TWILIO_ACCOUNT_SID != "mock_sid":
         try:
@@ -117,29 +111,12 @@ def send_sms_fallback(message):
     else:
         print("   => (Mock SMS Sent - update Twilio credentials to send real SMS)")
 
-def publish_alert(mqtt_client, payload):
-    global is_offline
-    if is_offline:
-        print("[MQTT] connection_lost: caching payload")
-        # Trigger SMS fallback immediately due to offline status
-        msg = f"Aegis Offline Alert: {payload['alert_type']}. Confidence: {payload['confidence']:.2f}"
-        send_sms_fallback(msg)
-    else:
-        try:
-            mqtt_client.publish(MQTT_TOPIC, json.dumps(payload))
-            print(f"[MQTT PUBLISH] {MQTT_TOPIC}: {payload}")
-        except Exception as e:
-            print(f"[MQTT ERROR] Publish failed: {e}. Switching to offline mode.")
-            is_offline = True
-            msg = f"Aegis Offline Alert: {payload['alert_type']}. Confidence: {payload['confidence']:.2f}"
-            send_sms_fallback(msg)
-
 # ==========================================
 # MAIN EXECUTION
 # ==========================================
 def main():
     print("========================================")
-    print("Aegis Wave: Edge Node Simulator")
+    print("Aegis Wave: Edge Simulation")
     print("========================================")
     
     # 0. Purge old visualisations and prepare report directory
@@ -160,19 +137,7 @@ def main():
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
     
-    # 2. Initialize MQTT Client
-    print(f"Attempting to connect to MQTT Broker at {MQTT_BROKER}:{MQTT_PORT}...")
-    mqtt_client = mqtt.Client()
-    try:
-        mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-        mqtt_client.loop_start()
-        print(" => Connected successfully.")
-    except Exception as e:
-        print(f" => Connection failed: {e}")
-        print(" => Running in OFFLINE mode (Graceful Degradation simulation active).")
-        is_offline = True
-
-    # 3. Load dataset metadata and Scaler parameters
+    # 2. Load dataset metadata and Scaler parameters
     metadata_path = os.path.join(DATA_DIR, "metadata/sample_metadata.csv")
     test_ids_path = os.path.join(DATA_DIR, "splits/test_id.json")
     scaler_path = "scaler_params.json"
@@ -194,7 +159,7 @@ def main():
         scaler_scale = np.array(scaler_params["scale"])
         print("Global scaler parameters loaded for robust inference.")
 
-    # 4. Load a Baseline sample for visualization (find first Nonfall sample)
+    # 3. Load a Baseline sample for visualization (find first Nonfall sample)
     baseline_data = None
     baseline_row = metadata_df[metadata_df["label"] == "Nonfall"]
     if not baseline_row.empty:
@@ -227,7 +192,7 @@ def main():
         
         sample_data = load_csi_sample(file_path)
         if sample_data is None:
-            print("Skipped malformed frame.")
+            print("Skipped malformed frame.\n")
             continue
             
         # Standardize sample using Global Scaler (crucial for model performance)
@@ -261,25 +226,17 @@ def main():
         # Visualize the waveform
         visualize_waveform(processed_sample, sample_id, actual_label, fall_confidence, baseline_data)
         
-        payload = {
-            "timestamp": time.time(),
-            "sensor_id": "hdb_living_room_1",
-            "confidence": fall_confidence
-        }
-        
         if fall_confidence >= EMERGENCY_THRESHOLD:
             print("🚨 HIGH CONFIDENCE: Fall Detected!")
-            payload["alert_type"] = "Emergency_Fall"
-            payload["action"] = "Dispatch Ambulance"
-            publish_alert(mqtt_client, payload)
+            msg = f"Aegis Emergency Alert: Fall Detected. Confidence: {fall_confidence:.2f}. Action: Dispatch Ambulance."
+            send_sms_alert(msg)
             
         elif fall_confidence >= ANOMALY_THRESHOLD:
             print(f"⚠️ ANOMALY DETECTED: Fall-like Event (Confidence {fall_confidence:.2f} < {EMERGENCY_THRESHOLD})")
             print("   => Action: Escalating safely without alarm fatigue.")
             print("   => Triggering automated smart speaker voice call: 'Auntie, did you drop something? Please say yes.'")
-            payload["alert_type"] = "Anomaly_Fall_Like"
-            payload["action"] = "Smart Speaker Check-in"
-            publish_alert(mqtt_client, payload)
+            msg = f"Aegis Anomaly Alert: Fall-like Event. Confidence: {fall_confidence:.2f}. Action: Smart Speaker Check-in."
+            send_sms_alert(msg)
             
         else:
             print("✅ Status: Normal. Background activities detected. No action required.")
@@ -317,10 +274,6 @@ def main():
         f.write(res_df.to_string())
     
     print(f"Simulation report generated: {report_file}")
-
-    if not is_offline:
-        mqtt_client.loop_stop()
-        mqtt_client.disconnect()
         
     print("========================================")
     print("Simulation completed.")
