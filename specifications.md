@@ -1,69 +1,73 @@
-# Aegis: Fall Detection  WiFi CSI
+# Aegis: Technical Specification & Implementation Guide
 
-**Tagline:** Zero-vision, zero-contact fall detection for the elderly using ambient Wi-Fi.
-
----
-
-## 1. The MVP Technical Spec
-
-For a 50-hour hackathon, do not try to configure physical Wi-Fi NICs to extract live CSI data—it is notoriously tricky. Instead, build the system architecture and simulate the edge node using pre-recorded public data.
-
-* **The Data Source:** Utilise open-source datasets such as `csi_FallDetection`, `FallDeFi`, or other public datasets on Kaggle. These contain thousands of pre-processed Wi-Fi CSI matrices labeled with actions like "Fall," "Sit Down," "Walk," and "Pick Up."
-* **The AI Model:** Train a lightweight 1D-CNN (Convolutional Neural Network) or GRU (Gated Recurrent Unit) on the dataset. Convert it to **TensorFlow Lite** to prove it can run on an edge device with low compute.
-* **The (Simulated) Edge Node:** A Python script (`edge_simulation.py`) that reads the CSI dataset frame-by-frame (simulating a live Wi-Fi router feed), runs the local TFLite model, and triggers immediate alerts via **SMS**.
-* **Explainability:** The system generates "Waveform Anomaly Charts" for every detection, allowing dispatchers to visually verify the anomaly.
+**Project Tagline:** Zero-vision, zero-contact fall detection for the elderly using ambient Wi-Fi.
 
 ---
 
-## 2. The Video Pitch: Showcasing the Differentiators
+## 1. The Core Architecture: "Signal to Alert"
 
-Here is exactly how to weave the Responsible AI requirements into your 2-minute video demo to score maximum points.
+The Aegis system is designed to operate entirely at the edge, ensuring absolute privacy and low-latency response. It transforms standard Wi-Fi router signals (CSI) into immediate life-saving alerts.
 
-### A. Zero-Trust Privacy by Default
-* **The Innovation:** Hardware-level privacy. You cannot leak video/sound footage if there is no camera in the first place.
-* **In the Video:** Start with a stark visual comparison. On the left, show a blurred CCTV camera feed of an elderly person. Put a red "X" over it. On the right, show a cascading matrix of numbers (the CSI subcarrier amplitudes).
-* **Voiceover:** > *"Elderly residents refuse cameras in their HDB flats. Aegis uses standard Wi-Fi routers. We don't analyze pixels; we analyze how radio waves bounce off the water in the human body. It is physically impossible for our system to capture a face or a voice."*
+### A. The Data Source (Wi-Fi CSI)
+Instead of relying on vision (cameras) or sound (microphones), Aegis analyzes **Channel State Information (CSI)**. CSI measures how Wi-Fi subcarriers are attenuated and phased as they bounce off objects—specifically the water-dense human body. 
+- **Privacy:** It is physically impossible to reconstruct a face or a voice from CSI data.
+- **Ubiquity:** Every modern Wi-Fi router generates this data.
 
-### B. The "Negative Space" Demo (Failing Safely)
-* **The Innovation:** Avoiding alarm fatigue. If the AI is unsure, it escalates gracefully instead of triggering a full emergency response.
-* **In the Video:** Show a simulation of someone dropping a heavy bag of rice. The AI model processes the CSI wave disturbance.
-* **The terminal Action:** The simulation shows: `ANOMALY DETECTED. Action: Fall-like Event. Confidence: 62% (Below 85% Emergency Threshold).` Instead of calling an ambulance, the system executes a safe fallback: it triggers an automated voice call to the resident's smart speaker: *"Auntie, did you drop something? Please say yes."*
+### B. Signal Processing Pipeline
+Every frame of CSI data undergoes a 3-step preparation phase:
+1. **Butterworth Bandpass Filter:** We apply a 0.5Hz to 10Hz filter to eliminate background "noise" (like fan blades) and isolate the specific frequency range of human movements (walking, sitting, falling).
+2. **Standardization:** Raw CSI amplitudes vary across devices (HP vs. ESP32). We use **Global Scaling Parameters** (mean/std) derived from the entire training set to ensure the model sees a consistent input distribution.
+3. **Temporal Slicing:** The data is windowed into 64 subcarriers × 500 time steps, representing a 5-second window of activity.
 
-### C. The "UI of Trust" (Explainability)
-* **The Innovation:** Dispatchers need to know *why* the AI triggered an alert to trust it.
-* **In the Video:** Zoom in on your simulation output and generated graphs. When a true fall is detected (Confidence 98%), the system doesn't just print an alert. It saves a "Waveform Anomaly Chart."
-* **The UI Action:** Show a simple graph comparing the "Normal Empty Room Baseline CSI" vs the "Current Disturbed CSI."
-* **Voiceover:** > *"Our system doesn't just demand blind trust. It visually proves the anomaly, showing the exact moment the Wi-Fi signal was fractured by a rapid human descent, allowing for immediate, confident verification."*
-
-### D. Tangible Resilience (Graceful Degradation)
-* **The Innovation:** A public safety system must be resilient to network fluctuations.
-* **In the Video:** Show the edge node's ability to trigger immediate SMS alerts directly from the edge.
-* **The UI Action:** Trigger a fall in the simulation. Show the terminal output firing a Twilio API integration, immediately sending an SMS text to a caregiver's phone.
-* **Voiceover:** *"Aegis is built for resilience. Alerts don't just sit in a dashboard; they are fired as immediate SMS notifications to caregivers, ensuring the alert always gets through even if primary internet services are fluctuating."*
+### C. The Edge AI Engine (TensorFlow Lite)
+To prove deployment viability on resource-constrained hardware (Raspberry Pi, ESP32, edge routers), we use a quantized **1D-CNN**.
+- **Model Size:** ~27KB.
+- **Inference Speed:** <5ms on a standard CPU.
+- **Logic:** The model performs binary classification between "Fall" (Index 0) and "Nonfall" (Index 1).
 
 ---
 
-## 3. Future Extensions
+## 2. Responsible AI: The "UI of Trust"
 
-* **MQTT Integration:** Implementing a pub/sub architecture using MQTT for real-time dashboard updates and centralized management of multiple edge nodes.
-* **The Dispatch UI:** A lightweight web dashboard for the HDB block warden or emergency dispatcher to subscribe to MQTT alerts and view real-time CSI streams.
-* **Physical Hardware:** Moving beyond simulation to extract real-time CSI data from physical Wi-Fi NICs.
+In emergency dispatch, blind trust in AI is dangerous. Aegis solves this through two critical design patterns:
+
+### A. Explainability via Waveform Anomaly Charts
+Whenever an alert is triggered, the system generates a **Waveform Anomaly Chart**. This graph plots the current disturbed Wi-Fi signal against a "Normal Room Baseline." 
+- **Judge/Dispatcher Value:** The dispatcher can visually verify the "fractured" wave caused by a rapid human descent before dispatching resources.
+
+### B. Intelligent Escalation (Graceful Degradation)
+To avoid "alarm fatigue" (the boy who cried wolf), Aegis uses confidence-based thresholds:
+- **EMERGENCY (Conf > 85%):** A high-confidence fall. Immediate dispatch of emergency services.
+- **ANOMALY (60% < Conf < 85%):** A "fall-like" disturbance. Instead of an ambulance, it triggers a smart speaker check-in: *"Auntie, did you drop something? Please say yes."*
+- **SMS Integration:** All high-priority events fire a Twilio SMS to caregivers, ensuring alerts reach humans even if primary dashboard services fail.
+
+---
+
+## 3. Implementation Workflow
+
+### training.ipynb: The Model Pipeline
+- **Modular Data Loading:** Robustly handles disparate HDF5 shapes.
+- **Training Strategy:** Implements **EarlyStopping** and **ModelCheckpointing** to find the absolute best version of the model.
+- **Scaler Export:** Saves the global standardization parameters to `scaler_params.json`, a critical step for cross-platform inference accuracy.
+
+### edge_simulation.py: The Simulator
+This script mimics a live edge node deployment:
+- **Randomization:** Picks unique test samples for every run to prove robustness.
+- **Real-time Feedback:** Prints inference probabilities and escalation actions to the terminal.
+- **Validation Logs:** Automatically generates a `reports/` text file with accuracy metrics (Overall, Per-Label, Per-Device).
 
 ---
 
-## 4. Development & Implementation Notebooks
-
-The model implementation is divided strictly into singular-purpose notebooks according to their filenames, ensuring modularity and clean execution:
-
-* **`training.ipynb` (Model Pipeline & Edge Export):** The core machine learning pipeline. It handles the standardization of disparate CSI inputs (e.g., matching 232-subcarrier to 64-subcarrier shapes), trains the lightweight 1D-CNN model with early stopping/validation, and directly exports the quantized `aegis_wave_final.tflite` optimized for constrained edge devices.
-
-## 5. Hardware Compatibility & Stability (Apple Silicon)
-
-On Apple Silicon (M-series) Macs, the transition from **GPU-accelerated training** (`tensorflow-metal`) to **CPU-based graph conversion** (`TFLiteConverter`) is a known stability bottleneck.
-
-- **Stable Versioning:** We pinned the environment to **TensorFlow 2.15.0** and **Keras 2.15.0**. This avoids the Keras 3.x memory-sync bug that often leads to hard kernel crashes during TFLite optimization.
-- **Python Versioning:** Using **Python 3.10** ensures compatibility with stable `pandas` and `scipy` builds for macOS without requiring unstable source-level compilation.
-- **GPU Management:** To prevent kernel crashes, we explicitly enable `experimental.set_memory_growth` and use `TF_USE_LEGACY_KERAS=1` to ensure the model graph is cleanly handled by the legacy TFLite converter.
+## 4. Hardware Stability & Compatibility
+The project is built on **Python 3.10** with pinned versions for TensorFlow and Keras to ensure stability across Windows, Linux, and macOS. 
+- **Legacy Compatibility:** We use `TF_USE_LEGACY_KERAS=1` to ensure the TFLite converter correctly handles the 1D-CNN graph, avoiding common kernel crashes on modern architectures.
 
 ---
-*This project hits every single note the DLW track is looking for: edge computing, extreme privacy, empathy for a vulnerable community, and deep technical execution.*
+
+## 5. Future Roadmap
+- **MQTT Integration:** Moving from local simulation to a distributed pub/sub architecture.
+- **Dispatch UI:** A centralized web dashboard for block wardens to monitor multiple units.
+- **Cross-Frequency Analysis:** Incorporating 5GHz and 6GHz bands for even higher precision.
+
+---
+*Aegis hits every core mandate of the DLW track: edge computing, extreme privacy, and deep technical execution with empathy for the vulnerable.*
