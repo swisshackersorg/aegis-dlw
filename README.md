@@ -17,8 +17,7 @@ Aegis Wave uses Wi-Fi CSI (Channel State Information) to detect falls without ca
 
 This project is separated into singular-purpose Jupyter Notebooks to cleanly reflect each stage of the development and testing process:
 
-- **[specifications.md](specifications.md)** - Complete technical specification and hackathon implementation guide.
-- **[smoke_test.ipynb](smoke_test.ipynb)** - An ultra-robust diagnostic and data integrity test. Its singular purpose is to ensure the real HDF5 dataset can be successfully parsed, sanitized of NaN/Inf values, and that both Dense and 1D-CNN model architectures compile and execute correctly on the hardware without memory or compilation errors.
+- **[specifications.md](specifications.md)** - Complete technical specification and implementation guide.
 - **[training.ipynb](training.ipynb)** - The primary training and validation pipeline. Its singular purpose is to handle robust data processing (standardizing 232-subcarrier and 64-subcarrier inputs), train the 1D-CNN fall detection model, evaluate its performance, and export the optimized, quantized TensorFlow Lite model (`aegis_wave_final.tflite`) for deployment on heterogeneous edge devices.
 
 ## Setup Instructions
@@ -27,8 +26,8 @@ This project is separated into singular-purpose Jupyter Notebooks to cleanly ref
 We recommend using **Conda** for Apple Silicon (M-series) to ensure stable library linkage.
 
 ```bash
-conda create -n aegis-m4 python=3.10
-conda activate aegis-m4
+conda create -n aegis-mac python=3.10
+conda activate aegis-mac
 ```
 
 ### 2. Install Dependencies
@@ -36,7 +35,7 @@ conda activate aegis-m4
 pip install -r requirements.txt
 ```
 
-### 🍎 Apple Silicon (M-series) Stability
+### Apple Silicon (M-series) Stability
 On Mac M-series GPUs, the transition from training to TFLite conversion can cause **Kernel Crashes** due to memory-sync issues between `tensorflow-metal` and Keras 3.
 
 To prevent this:
@@ -52,7 +51,7 @@ To prevent this:
 jupyter notebook
 ```
 
-Then open the notebook corresponding to your current task (e.g., `smoke_test.ipynb` to verify data loading and compilation, or `training.ipynb` for full model training and export).
+Then open the notebook corresponding to your current task (i.e., `training.ipynb` for full model training and export) and run accordingly.
 
 ## Dataset
 
@@ -70,4 +69,4 @@ Real data sets are processed in `smoke_test.ipynb` for data sanitization checks 
 
 ## License
 
-MIT License - Built for DLW Hackathon 2026
+MIT License - Built for DLWeek 2026
