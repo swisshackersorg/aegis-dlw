@@ -30,6 +30,9 @@ data/
 *.csv
 *.dat
 
+# Output
+visualisations/
+
 # IDE
 .vscode/
 .idea/
