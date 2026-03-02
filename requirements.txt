@@ -2,6 +2,7 @@
 tensorflow-macos==2.15.0
 tensorflow-metal==1.1.0
 keras==2.15.0
+tf_keras
 
 # Scientific Computing & Data (Python 3.10+ Compatible)
 numpy==1.26.4

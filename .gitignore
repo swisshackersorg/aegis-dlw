@@ -32,6 +32,7 @@ data/
 
 # Output
 visualisations/
+reports/
 
 # IDE
 .vscode/

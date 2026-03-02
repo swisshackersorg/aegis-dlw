@@ -2,6 +2,8 @@ import time
 import json
 import os
 import sys
+import random
+import shutil
 import numpy as np
 import pandas as pd
 import h5py
@@ -21,6 +23,7 @@ TIME_STEPS = 500
 EMERGENCY_THRESHOLD = 0.85
 ANOMALY_THRESHOLD = 0.60
 VISUALISATION_DIR = "visualisations/"
+REPORT_DIR = "reports/"
 
 # MQTT Settings (Local simulated broker)
 MQTT_BROKER = "localhost"
@@ -139,6 +142,13 @@ def main():
     print("Aegis Wave: Edge Node Simulator")
     print("========================================")
     
+    # 0. Purge old visualisations and prepare report directory
+    if os.path.exists(VISUALISATION_DIR):
+        print(f"Purging old visualisations from {VISUALISATION_DIR}...")
+        shutil.rmtree(VISUALISATION_DIR)
+    os.makedirs(VISUALISATION_DIR, exist_ok=True)
+    os.makedirs(REPORT_DIR, exist_ok=True)
+
     # 1. Initialize TFLite model
     if not os.path.exists(MODEL_PATH):
         print(f"Error: Model not found at {MODEL_PATH}. Please run training.ipynb first.")
@@ -175,11 +185,14 @@ def main():
     with open(test_ids_path, "r") as f:
         test_ids = json.load(f)
     
+    # Randomize selection for robustness testing
+    selected_ids = random.sample(test_ids, min(10, len(test_ids)))
+    
     with open(scaler_path, "r") as f:
         scaler_params = json.load(f)
         scaler_mean = np.array(scaler_params["mean"])
         scaler_scale = np.array(scaler_params["scale"])
-        print("✅ Global scaler parameters loaded for robust inference.")
+        print("Global scaler parameters loaded for robust inference.")
 
     # 4. Load a Baseline sample for visualization (find first Nonfall sample)
     baseline_data = None
@@ -193,15 +206,19 @@ def main():
             baseline_data = ((baseline_data_flat - scaler_mean) / (scaler_scale + 1e-7)).reshape(baseline_data.shape)
             print(f"Baseline (Nonfall) sample loaded for visualization: {baseline_row.iloc[0]['id']}")
 
-    print("Starting simulated live Wi-Fi CSI feed...")
+    print(f"Starting simulated live Wi-Fi CSI feed...\n")
     
-    # Simulate processing a batch of samples from the test set
-    for count, sample_id in enumerate(test_ids[:10], start=1):
+    # Results tracking for report
+    simulation_results = []
+
+    # Process a batch of (10) random samples from the test set
+    for count, sample_id in enumerate(selected_ids, start=1):
         row = metadata_df[metadata_df["id"] == sample_id]
         if row.empty: continue
         
         file_path = row.iloc[0]["file_path"]
         actual_label = row.iloc[0]["label"]
+        device = row.iloc[0]["device"]
         
         print(f"--- Frame {count} | True Action: {actual_label} ---")
         
@@ -228,9 +245,19 @@ def main():
         # Output is [prob_fall, prob_nonfall] per LABEL_MAP = {"Fall": 0, "Nonfall": 1}
         fall_confidence = float(output_data[0][0])
         nonfall_confidence = float(output_data[0][1])
+        predicted_label = "Fall" if fall_confidence >= EMERGENCY_THRESHOLD else "Nonfall"
         
         print(f"AI Inference -> Fall Probability: {fall_confidence:.4f} | Non-fall Probability: {nonfall_confidence:.4f}")
         
+        # Track results
+        simulation_results.append({
+            "id": sample_id,
+            "true": actual_label,
+            "pred": predicted_label,
+            "device": device,
+            "conf": fall_confidence
+        })
+
         # Visualize the waveform
         visualize_waveform(processed_sample, sample_id, actual_label, fall_confidence, baseline_data)
         
@@ -256,6 +283,40 @@ def main():
             
         else:
             print("✅ Status: Normal. Background activities detected. No action required.")
+        
+        print(f"\n")
+
+    # Generate Accuracy Report
+    res_df = pd.DataFrame(simulation_results)
+    accuracy = (res_df["true"] == res_df["pred"]).mean()
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    report_file = os.path.join(REPORT_DIR, f"report_{timestamp}.txt")
+    
+    with open(report_file, "w") as f:
+        f.write("========================================\n")
+        f.write(f"AEGIS SIMULATION REPORT - {timestamp}\n")
+        f.write("========================================\n")
+        f.write(f"Total Samples Processed: {len(res_df)}\n")
+        f.write(f"Overall Accuracy: {accuracy:.4f}\n\n")
+        
+        f.write("--- PER LABEL ACCURACY ---\n")
+        for label in ["Fall", "Nonfall"]:
+            label_df = res_df[res_df["true"] == label]
+            if not label_df.empty:
+                acc = (label_df["true"] == label_df["pred"]).mean()
+                f.write(f"  - {label}: {acc:.4f} ({len(label_df)} samples)\n")
+        
+        f.write("\n--- PER DEVICE ACCURACY ---\n")
+        for dev in res_df["device"].unique():
+            dev_df = res_df[res_df["device"] == dev]
+            if not dev_df.empty:
+                acc = (dev_df["true"] == dev_df["pred"]).mean()
+                f.write(f"  - {dev}: {acc:.4f} ({len(dev_df)} samples)\n")
+        
+        f.write("\n--- SAMPLE DETAILS ---\n")
+        f.write(res_df.to_string())
+    
+    print(f"Simulation report generated: {report_file}")
 
     if not is_offline:
         mqtt_client.loop_stop()
