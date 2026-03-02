@@ -24,14 +24,14 @@ ANOMALY_THRESHOLD = 0.60
 VISUALISATION_DIR = "visualisations/"
 REPORT_DIR = "reports/"
 
-# Twilio Settings (Mock values, replace with real credentials)
+# Twilio Settings (Mock credentials for now)
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "mock_sid")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "mock_token")
 TWILIO_FROM_PHONE = os.getenv("TWILIO_FROM_PHONE", "+1234567890")
 CAREGIVER_PHONE = os.getenv("CAREGIVER_PHONE", "+0987654321")
 
 # Global State
-is_offline = False # Set to True to simulate "pull the plug" graceful degradation
+is_offline = True # Set to True to simulate "pull the plug" graceful degradation
 
 # ==========================================
 # SIGNAL PROCESSING & VISUALIZATION
@@ -109,7 +109,7 @@ def send_sms_alert(message):
         except Exception as e:
             print(f"   => Failed to send SMS: {e}")
     else:
-        print("   => (Mock SMS Sent - update Twilio credentials to send real SMS)")
+        print("   => (Mock SMS Sent)")
 
 # ==========================================
 # MAIN EXECUTION
@@ -228,14 +228,14 @@ def main():
         
         if fall_confidence >= EMERGENCY_THRESHOLD:
             print("🚨 HIGH CONFIDENCE: Fall Detected!")
-            msg = f"Aegis Emergency Alert: Fall Detected. Confidence: {fall_confidence:.2f}. Action: Dispatch Ambulance."
+            msg = f"Aegis Emergency Alert: Fall Detected. Confidence: {fall_confidence:.2f}. Action: Alert Caregiver."
             send_sms_alert(msg)
             
         elif fall_confidence >= ANOMALY_THRESHOLD:
             print(f"⚠️ ANOMALY DETECTED: Fall-like Event (Confidence {fall_confidence:.2f} < {EMERGENCY_THRESHOLD})")
             print("   => Action: Escalating safely without alarm fatigue.")
-            print("   => Triggering automated smart speaker voice call: 'Auntie, did you drop something? Please say yes.'")
-            msg = f"Aegis Anomaly Alert: Fall-like Event. Confidence: {fall_confidence:.2f}. Action: Smart Speaker Check-in."
+            print("   => Triggering automated speaker broadcast: 'Hello, have you fallen? Please answer.'")
+            msg = f"Aegis Anomaly Alert: Fall-like Event. Confidence: {fall_confidence:.2f}. Action: Speaker Check-in."
             send_sms_alert(msg)
             
         else:
