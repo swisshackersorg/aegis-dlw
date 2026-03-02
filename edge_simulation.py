@@ -127,7 +127,7 @@ def send_sms_alert(message):
 
 def main():
     print("========================================")
-    print("Aegis Wave: Edge Simulation")
+    print("Aegis: Edge Simulation")
     print("========================================")
 
     # 0. Purge old visualisations and prepare report directory
