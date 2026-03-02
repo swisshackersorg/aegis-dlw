@@ -29,7 +29,7 @@ We recommend using **Python 3.10**.
    ```
 3. Activate the virtual environment:
    ```bash
-   # n Windows
+   # In Windows
    aegis\Scripts\activate
    ```
    ```bash
@@ -44,7 +44,7 @@ We recommend using **Python 3.10**.
 ### 2. Model Training (Optional)
 The project comes with a pre-trained model (`aegis_final.tflite`) and scaling parameters (`scaler_params.json`). If you wish to retrain:
 1. Ensure the `data/` directory is populated with the CSI dataset.
-2. Launch Jupyter: `jupyter notebook`.
+2. Launch Jupyter: `jupyter notebook` (or select a kernel in your IDE).
 3. Open **`training.ipynb`**.
 4. Run all cells. This will:
    - Standardize disparate Wi-Fi signals (HP vs. ESP32).
