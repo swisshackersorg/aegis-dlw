@@ -18,11 +18,8 @@ build/
 # Anaconda
 anaconda_projects/
 
-# TensorFlow/Models
-*.tflite
+# TF
 *.h5
-*.pb
-saved_model/
 
 # Data
 falldefi_dataset/
@@ -31,8 +28,8 @@ data/
 *.dat
 
 # Output
-visualisations/
-reports/
+visualisations/*
+reports/*
 
 # IDE
 .vscode/
