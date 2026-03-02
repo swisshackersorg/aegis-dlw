@@ -63,7 +63,7 @@ Real data sets are processed in `smoke_test.ipynb` for data sanitization checks 
 ## Technology Stack
 
 - **ML Framework**: TensorFlow/Keras + scikit-learn
-- **Edge Deployment**: TensorFlow Lite (<100KB models)
+- **Edge Deployment**: TensorFlow Lite (<30KB models)
 - **Signal Processing**: SciPy (Butterworth filtering)
 - **Visualization**: Matplotlib
 
