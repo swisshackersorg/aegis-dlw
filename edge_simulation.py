@@ -31,7 +31,7 @@ TWILIO_FROM_PHONE = os.getenv("TWILIO_FROM_PHONE", "+1234567890")
 CAREGIVER_PHONE = os.getenv("CAREGIVER_PHONE", "+0987654321")
 
 # Global State
-is_offline = True # Set to True to simulate "pull the plug" graceful degradation
+is_offline = False
 
 # ==========================================
 # SIGNAL PROCESSING & VISUALIZATION
