@@ -162,18 +162,24 @@ def main():
         print(" => Running in OFFLINE mode (Graceful Degradation simulation active).")
         is_offline = True
 
-    # 3. Load dataset metadata to simulate live feed
+    # 3. Load dataset metadata and Scaler parameters
     metadata_path = os.path.join(DATA_DIR, "metadata/sample_metadata.csv")
     test_ids_path = os.path.join(DATA_DIR, "splits/test_id.json")
+    scaler_path = "scaler_params.json"
     
-    if not os.path.exists(metadata_path) or not os.path.exists(test_ids_path):
-        print("Error: Dataset metadata or test splits not found.")
-        print(f"Ensure {metadata_path} and {test_ids_path} exist.")
+    if not all(os.path.exists(p) for p in [metadata_path, test_ids_path, scaler_path]):
+        print(f"Error: Missing required files: {[p for p in [metadata_path, test_ids_path, scaler_path] if not os.path.exists(p)]}")
         sys.exit(1)
 
     metadata_df = pd.read_csv(metadata_path)
     with open(test_ids_path, "r") as f:
         test_ids = json.load(f)
+    
+    with open(scaler_path, "r") as f:
+        scaler_params = json.load(f)
+        scaler_mean = np.array(scaler_params["mean"])
+        scaler_scale = np.array(scaler_params["scale"])
+        print("✅ Global scaler parameters loaded for robust inference.")
 
     # 4. Load a Baseline sample for visualization (find first Nonfall sample)
     baseline_data = None
@@ -182,7 +188,9 @@ def main():
         baseline_file = baseline_row.iloc[0]["file_path"]
         baseline_data = load_csi_sample(baseline_file)
         if baseline_data is not None:
-            baseline_data = (baseline_data - np.mean(baseline_data)) / (np.std(baseline_data) + 1e-7)
+            # Standardize baseline for display using global scaler
+            baseline_data_flat = baseline_data.reshape(-1)
+            baseline_data = ((baseline_data_flat - scaler_mean) / (scaler_scale + 1e-7)).reshape(baseline_data.shape)
             print(f"Baseline (Nonfall) sample loaded for visualization: {baseline_row.iloc[0]['id']}")
 
     print("Starting simulated live Wi-Fi CSI feed...")
@@ -205,8 +213,10 @@ def main():
             print("Skipped malformed frame.")
             continue
             
-        # Standardize sample
-        processed_sample = (sample_data - np.mean(sample_data)) / (np.std(sample_data) + 1e-7)
+        # Standardize sample using Global Scaler (crucial for model performance)
+        sample_data_flat = sample_data.reshape(-1)
+        processed_sample_flat = (sample_data_flat - scaler_mean) / (scaler_scale + 1e-7)
+        processed_sample = processed_sample_flat.reshape(sample_data.shape)
         
         input_data = np.expand_dims(processed_sample, axis=0).astype(np.float32)
         
@@ -215,10 +225,11 @@ def main():
         interpreter.invoke()
         output_data = interpreter.get_tensor(output_details[0]['index'])
         
-        # Output is [prob_fall, prob_nonfall] (0 = Fall, 1 = Nonfall)
+        # Output is [prob_fall, prob_nonfall] per LABEL_MAP = {"Fall": 0, "Nonfall": 1}
         fall_confidence = float(output_data[0][0])
+        nonfall_confidence = float(output_data[0][1])
         
-        print(f"AI Inference -> Fall Confidence: {fall_confidence:.4f}")
+        print(f"AI Inference -> Fall Probability: {fall_confidence:.4f} | Non-fall Probability: {nonfall_confidence:.4f}")
         
         # Visualize the waveform
         visualize_waveform(processed_sample, sample_id, actual_label, fall_confidence, baseline_data)
