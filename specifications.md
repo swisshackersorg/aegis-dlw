@@ -56,5 +56,13 @@ The model implementation is divided strictly into singular-purpose notebooks acc
 * **`smoke_test.ipynb` (Validation & Integrity):** Focuses exclusively on data sanitization and model compilation viability. It verifies that real CSI HDF5 data can be parsed without NaN/Inf faults and that basic Dense and 1D-CNN layers compile on the host hardware.
 * **`training.ipynb` (Model Pipeline & Edge Export):** The core machine learning pipeline. It handles the standardization of disparate CSI inputs (e.g., matching 232-subcarrier to 64-subcarrier shapes), trains the lightweight 1D-CNN model with early stopping/validation, and directly exports the quantized `aegis_wave_final.tflite` optimized for constrained edge devices.
 
+## 5. Hardware Compatibility & Stability (Apple Silicon)
+
+On Apple Silicon (M-series) Macs, the transition from **GPU-accelerated training** (`tensorflow-metal`) to **CPU-based graph conversion** (`TFLiteConverter`) is a known stability bottleneck.
+
+- **Stable Versioning:** We pinned the environment to **TensorFlow 2.15.0** and **Keras 2.15.0**. This avoids the Keras 3.x memory-sync bug that often leads to hard kernel crashes during TFLite optimization.
+- **Python Versioning:** Using **Python 3.10** ensures compatibility with stable `pandas` and `scipy` builds for macOS without requiring unstable source-level compilation.
+- **GPU Management:** To prevent kernel crashes, we explicitly enable `experimental.set_memory_growth` and use `TF_USE_LEGACY_KERAS=1` to ensure the model graph is cleanly handled by the legacy TFLite converter.
+
 ---
 *This project hits every single note the DLW track is looking for: edge computing, extreme privacy, empathy for a vulnerable community, and deep technical execution.*

@@ -24,25 +24,30 @@ This project is separated into singular-purpose Jupyter Notebooks to cleanly ref
 ## Setup Instructions
 
 ### 1. Create Virtual Environment
+We recommend using **Conda** for Apple Silicon (M-series) to ensure stable library linkage.
+
 ```bash
-py -3.12 -m venv venv
+conda create -n aegis-m4 python=3.10
+conda activate aegis-m4
 ```
 
-### 2. Activate Virtual Environment
-```bash
-# Windows
-venv\Scripts\activate
-
-# Linux/Mac
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
+### 2. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run Jupyter Notebooks
+### 🍎 Apple Silicon (M-series) Stability
+On Mac M-series GPUs, the transition from training to TFLite conversion can cause **Kernel Crashes** due to memory-sync issues between `tensorflow-metal` and Keras 3.
+
+To prevent this:
+1. We use the **"Golden Stable"** version set: `tensorflow-macos==2.15.0` + `keras==2.15.0`.
+2. Always include this environment flag at the **very start** of your notebook:
+   ```python
+   import os
+   os.environ['TF_USE_LEGACY_KERAS'] = '1'
+   ```
+
+### 3. Run Jupyter Notebooks
 ```bash
 jupyter notebook
 ```
