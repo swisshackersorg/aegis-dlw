@@ -3,9 +3,9 @@
 A privacy-first, zero-contact fall detection model using ambient Wi-Fi CSI.
 <br>
 <br>
-[![Demo Video](https://youtu.be/d6-Ni8neu-0)](https://youtu.be/d6-Ni8neu-0)
+[![Demo Video](https://youtu.be/7tMh3NUDd9s)](https://youtu.be/7tMh3NUDd9s)
 <br>
-[![swisshackers dlweek Demo Video](https://img.youtube.com/vi/d6-Ni8neu-0/0.jpg)](https://youtu.be/d6-Ni8neu-0)
+[![swisshackers dlweek Demo Video](https://img.youtube.com/vi/7tMh3NUDd9s/0.jpg)](https://youtu.be/7tMh3NUDd9s)
 
 ## 🛡️ Private by Design
 Elderly residents often refuse cameras in their homes due to privacy concerns. **Aegis** solves this by using standard Wi-Fi signals (Channel State Information - CSI) to detect human movement. 
