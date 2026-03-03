@@ -2,6 +2,9 @@
 
 A privacy-first, zero-contact fall detection model using ambient Wi-Fi CSI.
 <br>
+<br>
+[![Demo Video](https://youtu.be/d6-Ni8neu-0)](https://youtu.be/d6-Ni8neu-0)
+<br>
 [![swisshackers dlweek Demo Video](https://img.youtube.com/vi/d6-Ni8neu-0/0.jpg)](https://youtu.be/d6-Ni8neu-0)
 
 ## 🛡️ Private by Design
