@@ -1,6 +1,8 @@
 # Aegis: Zero-Vision Fall Detection for Elderly Care
 
 A privacy-first, zero-contact fall detection model using ambient Wi-Fi CSI.
+<br>
+[![swisshackers dlweek Demo Video](https://img.youtube.com/vi/d6-Ni8neu-0/0.jpg)](https://youtu.be/d6-Ni8neu-0)
 
 ## 🛡️ Private by Design
 Elderly residents often refuse cameras in their homes due to privacy concerns. **Aegis** solves this by using standard Wi-Fi signals (Channel State Information - CSI) to detect human movement. 
