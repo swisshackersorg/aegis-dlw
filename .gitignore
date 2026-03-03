@@ -37,6 +37,9 @@ reports/*
 *.swp
 *.swo
 
+# AI
+GEMINI.md
+
 # OS
 .DS_Store
 Thumbs.db

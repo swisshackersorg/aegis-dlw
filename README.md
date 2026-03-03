@@ -38,12 +38,16 @@ We recommend using **Python 3.10**.
    aegis\Scripts\activate
    ```
    ```bash
-   # On macOs/Linux
+   # On macOS/Linux
    source aegis/bin/activate
    ```
 4. Install Dependencies:
    ```bash
-   pip install -r requirements.txt
+   # In Windows
+   pip install -r requirements-windows.txt
+
+   # On macOS (Apple Silicon)
+   pip install -r requirements-macos.txt
    ```
 
 ### 2. Model Training (Optional)

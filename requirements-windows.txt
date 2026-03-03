@@ -1,0 +1,44 @@
+# Core ML Framework
+tensorflow==2.15.0
+keras==2.15.0
+tf_keras
+
+# Scientific Computing & Data (Python 3.10+ Compatible)
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.5.2
+scipy==1.14.1
+h5py==3.11.0
+
+# Visualization & Signal Processing
+matplotlib==3.9.2
+contourpy==1.3.1
+pillow==11.0.0
+
+# Environment & Jupyter
+ipykernel==6.29.5
+jupyter_client==8.6.3
+jupyter_core==5.7.2
+notebook==7.2.2
+
+# Utilities
+absl-py==2.1.0
+astunparse==1.6.3
+flatbuffers==24.3.25
+gast==0.5.5
+google-pasta==0.2.0
+grpcio==1.66.1
+libclang==18.1.1
+ml-dtypes==0.2.0
+opt-einsum==3.3.0
+packaging==24.1
+protobuf==4.25.5
+requests==2.32.3
+six==1.16.0
+termcolor==2.4.0
+typing_extensions==4.12.2
+wrapt==1.14.2
+pyarrow>=17.0.0
+numexpr>=2.10.1
+bottleneck>=1.4.0
+twilio==8.2.2
