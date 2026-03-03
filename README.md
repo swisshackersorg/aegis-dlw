@@ -79,8 +79,8 @@ python edge_simulation.py
 2. **Standardization**: Data is scaled using **Global Scaling Parameters** derived from the entire training set to ensure cross-device accuracy.
 3. **Inference**: A quantized **TensorFlow Lite 1D-CNN** performs binary classification (Fall vs. Nonfall).
 4. **Decision Engine**:
-   - `Conf > 85%`: **Emergency Fall** (Dispatch Ambulance + SMS).
-   - `60% < Conf < 85%`: **Anomaly** (Smart Speaker Check-in + SMS).
+   - `Conf > 85%`: **Emergency Fall** (Call emergency contact).
+   - `60% < Conf < 85%`: **Anomaly** (Call emergency contact + Flag data).
    - `Conf < 60%`: **Normal Activity**.
 
 ## 📂 Project Structure
