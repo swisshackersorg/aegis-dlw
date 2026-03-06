@@ -1,57 +1,70 @@
 # Aegis: Zero-Vision Fall Detection for Elderly Care
 
 A privacy-first, zero-contact fall detection model using ambient Wi-Fi CSI.
-<br>
-<br>
+
 [![Demo Video](https://youtu.be/7tMh3NUDd9s)](https://youtu.be/7tMh3NUDd9s)
-<br>
-[![swisshackers dlweek Demo Video](https://img.youtube.com/vi/7tMh3NUDd9s/0.jpg)](https://youtu.be/7tMh3NUDd9s)
 
 ## 🛡️ Private by Design
 Elderly residents often refuse cameras in their homes due to privacy concerns. **Aegis** solves this by using standard Wi-Fi signals (Channel State Information - CSI) to detect human movement. 
 
-By analyzing how radio waves bounce off the human body, Aegis can identify a fall with high accuracy without ever capturing a face or a voice. It is **physically impossible** for this system to leak visual or audio data.
-
 ## ✨ Key Features
+
 - 🔒 **Zero-Trust Privacy**: Hardware-level privacy using radio waves instead of pixels.
 - 🧠 **Edge-First AI**: Lightweight 1D-CNN model (~27KB) optimized for edge routers and IoT devices.
-- 📉 **UI of Trust**: Automated waveform anomaly charting that visually proves *why* the AI triggered an alert.
+- 📉 **UI of Trust**: Automated waveform anomaly charting that visually proves _why_ the AI triggered an alert.
 - 🚨 **Intelligent Escalation**: Multi-threshold logic (Emergency vs. Anomaly) to prevent "alarm fatigue" from false positives.
 - 📱 **Omni-Channel Alerting**: SMS integration via Twilio for immediate caregiver notification.
 - 📊 **Automated Reporting (Demo)**: Generates detailed accuracy and performance reports after every simulation run.
+
+## 📋 Prerequisite(s)
+
+- **Python 3.10**: This project is optimized for Python 3.10. Ensure it is installed on your system.
+  - **Installers**: [Download Python 3.10](https://www.python.org/downloads/release/python-31011/)
+  - **Homebrew**:
+    ```bash
+    brew install python@3.10
+    ```
 
 ## 🚀 Quickstart
 
 This project is designed to be fully reproducible on any modern OS (Windows, macOS, Linux).
 
 ### 1. Environment Setup
-We recommend using **Python 3.10**.
 
 1. Clone the repository and navigate to the project root.
-2. Create a virtual environment:
+2. Create a virtual environment using Python 3.10:
+
    ```bash
-   python -m venv aegis
+   # macOS
+   python3.10 -m venv aegis
+
+   # Windows
+   py -3.10 -m venv aegis
    ```
+
 3. Activate the virtual environment:
    ```bash
-   # In Windows
-   aegis\Scripts\activate
-   ```
-   ```bash
-   # On macOS/Linux
+   # macOS
    source aegis/bin/activate
    ```
-4. Install Dependencies:
    ```bash
-   # In Windows
-   pip install -r requirements-windows.txt
+   # Windows
+   aegis\Scripts\activate
+   ```
+4. Install Dependencies:
 
-   # On macOS (Apple Silicon)
+   ```bash
+   # macOS (Apple Silicon)
    pip install -r requirements-macos.txt
+
+   # Windows
+   pip install -r requirements-windows.txt
    ```
 
 ### 2. Model Training (Optional)
+
 The project comes with a pre-trained model (`aegis_final.tflite`) and scaling parameters (`scaler_params.json`). If you wish to retrain:
+
 1. Ensure the `data/` directory is populated with the CSI dataset.
 2. Launch Jupyter: `jupyter notebook` (or select a kernel in your IDE).
 3. Open **`training.ipynb`**.
@@ -61,14 +74,17 @@ The project comes with a pre-trained model (`aegis_final.tflite`) and scaling pa
    - Export the best version of the model and the global scaling parameters.
 
 ### 3. Run the Edge Simulation (Demo)
+
 The `edge_simulation.py` script simulates a live Wi-Fi router feed by pulling random samples from the test set.
 
 **To run the simulation:**
+
 ```bash
 python edge_simulation.py
 ```
 
 **What happens:**
+
 1. **Purge**: Clean up old visualisations.
 2. **Randomized Feed**: Select 10 random samples from the test set to prove model robustness.
 3. **Inference**: Process each frame through the Butterworth filter and then the TFLite model.
@@ -79,6 +95,7 @@ python edge_simulation.py
 ## 🛠️ Technical Implementation
 
 ### The Pipeline
+
 1. **Signal Processing**: Raw CSI is passed through a **Butterworth Bandpass Filter** (0.5Hz–10Hz) to isolate human movement frequencies.
 2. **Standardization**: Data is scaled using **Global Scaling Parameters** derived from the entire training set to ensure cross-device accuracy.
 3. **Inference**: A quantized **TensorFlow Lite 1D-CNN** performs binary classification (Fall vs. Nonfall).
@@ -88,6 +105,7 @@ python edge_simulation.py
    - `Conf < 60%`: **Normal Activity**.
 
 ## 📂 Project Structure
+
 ```
 aegis-dlw/
 ├── aegis_final.tflite
@@ -110,4 +128,5 @@ aegis-dlw/
 - `visualisations/`: Generated Waveform Anomaly Charts.
 
 ## 📜 Miscellaneous
+
 Developed for DLWeek 2026 by Swisshackers.
