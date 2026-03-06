@@ -18,8 +18,8 @@ Elderly residents often refuse cameras in their homes due to privacy concerns. *
 
 ## 📋 Prerequisite(s)
 
-- **Python 3.10**: This project is optimized for Python 3.10. Ensure it is installed on your system.
-  - **Installers**: [Download Python 3.10](https://www.python.org/downloads/release/python-31011/)
+This project was developed in Python 3.10 for compatibility purposes. Ensure it is installed on your system.
+  - **Universal Installers**: [Python 3.10](https://www.python.org/downloads/release/python-31011/)
   - **Homebrew**:
     ```bash
     brew install python@3.10
@@ -27,7 +27,7 @@ Elderly residents often refuse cameras in their homes due to privacy concerns. *
 
 ## 🚀 Quickstart
 
-This project is designed to be fully reproducible on any modern OS (Windows, macOS, Linux).
+This project is designed to be fully reproducible on any modern OS (Windows, macOS (with Apple Silicon), Linux).
 
 ### 1. Environment Setup
 
@@ -54,7 +54,7 @@ This project is designed to be fully reproducible on any modern OS (Windows, mac
 4. Install Dependencies:
 
    ```bash
-   # macOS (Apple Silicon)
+   # macOS
    pip install -r requirements-macos.txt
 
    # Windows
@@ -67,15 +67,15 @@ The project comes with a pre-trained model (`aegis_final.tflite`) and scaling pa
 
 1. Ensure the `data/` directory is populated with the CSI dataset.
 2. Launch Jupyter: `jupyter notebook` (or select a kernel in your IDE).
-3. Open **`training.ipynb`**.
+3. Open `training.ipynb`.
 4. Run all cells. This will:
    - Standardize disparate Wi-Fi signals (HP vs. ESP32).
    - Train the 1D-CNN with **EarlyStopping** and **ModelCheckpointing** to maximize accuracy.
-   - Export the best version of the model and the global scaling parameters.
+   - Export the best version of the model with the global scaling parameters.
 
 ### 3. Run the Edge Simulation (Demo)
 
-The `edge_simulation.py` script simulates a live Wi-Fi router feed by pulling random samples from the test set.
+The `edge_simulation.py` script simulates a live Wi-Fi router feed by pulling random samples from the test set. 
 
 **To run the simulation:**
 
