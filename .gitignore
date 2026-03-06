@@ -1,4 +1,5 @@
-# Virtual Environment
+# Virtual Environments
+aegis/
 venv/
 env/
 ENV/
@@ -18,7 +19,7 @@ build/
 # Anaconda
 anaconda_projects/
 
-# TF
+# Tensorflow
 *.h5
 
 # Data
@@ -26,6 +27,9 @@ falldefi_dataset/
 data/
 *.csv
 *.dat
+
+# Hardware
+esp-idf/
 
 # Output
 visualisations/*
