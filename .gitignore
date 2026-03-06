@@ -29,7 +29,7 @@ data/
 *.dat
 
 # Hardware
-esp-idf/
+esp/
 
 # Output
 visualisations/*
