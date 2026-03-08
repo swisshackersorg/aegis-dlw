@@ -35,6 +35,9 @@ esp/
 visualisations/*
 reports/*
 
+# Figma
+node_modules/
+
 # IDE
 .vscode/
 .idea/
@@ -43,6 +46,7 @@ reports/*
 
 # AI
 GEMINI.md
+guidelines/
 
 # OS
 .DS_Store
